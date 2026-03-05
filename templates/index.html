@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LCKDWN Security Scanner</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ASCII Header -->
+<header class="terminal-header">
+<pre>
+ ___       ________  ___  __    ________  ___       __   ________      
+|\  \     |\   ____\|\  \|\  \ |\   ___ \|\  \     |\  \|\   ___  \    
+\ \  \    \ \  \___|\ \  \/  /|\ \  \_|\ \ \  \    \ \  \ \  \\ \  \   
+ \ \  \    \ \  \    \ \   ___  \ \  \ \\ \ \  \  __\ \  \ \  \\ \  \  
+  \ \  \____\ \  \____\ \  \\ \  \ \  \_\\ \ \  \|\__\_\  \ \  \\ \  \ 
+   \ \_______\ \_______\ \__\\ \__\ \_______\ \____________\ \__\\ \__\
+    \|_______|\|_______|\|__| \|__|\|_______|\|____________|\|__| \|__|
+</pre>
+</header>
+
+<!-- About Section -->
+<div class="about-section terminal">
+    <h2>About</h2>
+    <p>
+        LCKDWN Email Security Scanner is a <strong>defense and security tool</strong> designed 
+        to help IT professionals and security teams <strong>protect digital assets</strong> 
+        by analyzing domains, IPs, emails, and full email headers.
+    </p>
+    <p>
+        The scanner evaluates technical signals (SPF, DKIM, DMARC, DNS, WHOIS, IP geolocation) 
+        and provides a <strong>phishing risk score</strong> with AI reasoning for actionable insights.
+    </p>
+    <p>
+        All processing is <strong>private and compliant</strong>. Customer or sensitive data is never stored 
+        and external API calls are optional or fully offline.
+    </p>
+</div>
+
+<div class="page-container">
+    <div class="content-container">
+
+        <!-- Scan Input Form -->
+        <form method="post" action="/scan">
+            <textarea
+                name="target"
+                placeholder="Enter domain, email, IP, or full email header..."
+                spellcheck="false"
+            ></textarea>
+            <button type="submit">Scan</button>
+        </form>
+
+        <!-- Error Messages -->
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <!-- Results -->
+        {% if result %}
+        <div class="results-container">
+
+            {% if result.type == "email_header" %}
+            <div class="result-section">
+                <h3>Email Header Analysis</h3>
+
+                <!-- Basic Info -->
+                <div class="section-block">
+                    <h4>Basic Info</h4>
+                    <ul>
+                        <li><strong>From:</strong> {{ result.parsed_header.from or "N/A" }}</li>
+                        <li><strong>To:</strong> {{ result.parsed_header.to or "N/A" }}</li>
+                        <li><strong>Reply-To:</strong> {{ result.parsed_header.reply_to or "None" }}</li>
+                        <li><strong>Subject:</strong> {{ result.parsed_header.subject or "N/A" }}</li>
+                    </ul>
+                </div>
+
+                <!-- Received Headers -->
+                {% if result.parsed_header.received %}
+                <div class="section-block">
+                    <h4>Received Headers</h4>
+                    <ul>
+                        {% for rcv in result.parsed_header.received %}
+                        <li><pre>{{ rcv }}</pre></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Phishing Indicators -->
+                <div class="section-block phishing-block">
+                    <h4>Phishing Indicators (Risk Score: {{ result.risk_score or "N/A" }})</h4>
+                    {% if result.phishing_issues %}
+                    <ul>
+                        {% for issue in result.phishing_issues %}
+                        <li>{{ issue }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No phishing issues detected yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- AI Analysis -->
+                <div class="section-block ai-block">
+                    <h4>AI Analysis Insights</h4>
+                    {% if result.ai_insights %}
+                    <ul>
+                        {% for insight in result.ai_insights %}
+                        <li>{{ insight }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>AI reasoning not generated yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Interpretation -->
+                <div class="section-block interpretation">
+                    <h4>Interpretation of Risk Score</h4>
+                    <ul>
+                        <li>0 → Safe / Very low risk</li>
+                        <li>1–2 → Mild risk, suspicious elements</li>
+                        <li>3–4 → Medium risk, likely suspicious email</li>
+                        <li>5+ → High risk, probable phishing</li>
+                    </ul>
+                </div>
+
+            </div>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+</body>
+</html>
